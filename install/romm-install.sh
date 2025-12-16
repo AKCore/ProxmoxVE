@@ -25,6 +25,7 @@ DOCKER_CONFIG_PATH='/etc/docker/daemon.json'
 mkdir -p $(dirname $DOCKER_CONFIG_PATH)
 echo -e '{\n  "log-driver": "journald"\n}' >/etc/docker/daemon.json
 $STD sh <(curl -fsSL https://get.docker.com)
+$STD systemctl enable docker
 msg_ok "Installed Docker $DOCKER_LATEST_VERSION"
 
 msg_info "Installing Docker Compose $DOCKER_COMPOSE_LATEST_VERSION"
@@ -206,7 +207,11 @@ chmod +x /opt/romm/romm-setup.sh
 
 cd /opt/romm
 $STD docker compose up -d
-msg_ok "Installed RomM"
+
+msg_info "Waiting for RomM to start"
+sleep 10
+timeout 120 bash -c 'until docker ps | grep -q "romm.*Up.*healthy\|romm.*Up.*\(healthy\)"; do sleep 5; done' 2>/dev/null || true
+msg_ok "RomM Started"
 
 msg_info "Configuring Firewall"
 if command -v ufw &>/dev/null; then

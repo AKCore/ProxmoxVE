@@ -42,6 +42,118 @@ msg_info "Creating Platform Folders (EmulatorJS Supported)"
 mkdir -p /opt/romm/library/roms/{3do,amiga,arcade,atari2600,atari5200,atari7800,jaguar,lynx,c64,colecovision,dos,flash,neo-geo-pocket,neo-geo-pocket-color,n64,nes,famicom,nds,gb,gbc,gba,pc-fx,psx,psp,sega32,segacd,gamegear,sms,genesis,saturn,snes,sfam,tg16,virtualboy,wonderswan,wonderswan-color}
 msg_ok "Created Platform Folders"
 
+msg_info "Creating RomM Configuration"
+cat <<'CONFIG' >/opt/romm/config/config.yml
+# RomM Configuration File
+# See https://docs.romm.app/latest/Getting-Started/Configuration-File/ for details
+
+# exclude:
+#   platforms:
+#     - excluded_folder_a
+#     - excluded_folder_b
+#   roms:
+#     single_file:
+#       extensions:
+#         - xml
+#         - txt
+#       names:
+#         - 'info.txt'
+#         - '._*'
+#         - '*.nfo'
+#     multi_file:
+#       names:
+#         - 3dboxes
+#         - backcovers
+#         - covers
+#         - fanart
+#         - manuals
+#         - marquees
+#         - miximages
+#         - physicalmedia
+#         - screenshots
+#         - titlescreens
+#         - videos
+#         - downloaded_media
+#         - media
+#       parts:
+#         names:
+#           - 'data.xml'
+#           - '._*'
+#         extensions:
+#           - xml
+#           - txt
+
+# system:
+#   platforms:
+#     gc: ngc
+#     ps1: psx
+#   versions:
+#     naomi: arcade
+
+filesystem:
+  roms_folder: 'roms'
+  # skip_hash_calculation: false
+
+scan:
+  priority:
+    metadata:
+      - "igdb"
+      - "moby"
+      - "ss"
+      - "ra"
+      - "launchbox"
+      - "gamelist"
+      - "hasheous"
+      - "flashpoint"
+      - "hltb"
+    artwork:
+      - "igdb"
+      - "moby"
+      - "ss"
+      - "ra"
+      - "launchbox"
+      - "gamelist"
+      - "hasheous"
+      - "flashpoint"
+      - "hltb"
+    region:
+      - "us"
+      - "wor"
+      - "ss"
+      - "eu"
+      - "jp"
+    language:
+      - "en"
+      - "fr"
+  media:
+    - box2d
+    - box3d
+    - miximage
+    - physical
+    - screenshot
+    - title_screen
+    - fanart
+    - bezel
+    - manual
+    # - video  # Warning: large file size
+
+# emulatorjs:
+#   debug: true
+#   cache_limit: null
+#   settings:
+#     parallel_n64:
+#       vsync: disabled
+#     snes9x:
+#       snes9x_region: ntsc
+#     default:
+#       fps: show
+#   netplay:
+#     enabled: true
+#     ice_servers:
+#       - urls: "stun:stun.relay.metered.ca:80"
+CONFIG
+msg_ok "Created RomM Configuration"
+
 DB_ROOT_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c16)
 DB_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c16)
 AUTH_SECRET=$(openssl rand -hex 32)

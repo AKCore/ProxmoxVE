@@ -36,7 +36,10 @@ msg_ok "Installed Docker Compose $DOCKER_COMPOSE_LATEST_VERSION"
 
 msg_info "Installing RomM"
 mkdir -p /opt/romm/{config,library,assets,resources,redis-data}
-mkdir -p /opt/romm/library/roms
+
+msg_info "Creating Platform Folders (EmulatorJS Supported)"
+mkdir -p /opt/romm/library/roms/{3do,amiga,arcade,atari2600,atari5200,atari7800,jaguar,lynx,c64,colecovision,dos,flash,neo-geo-pocket,neo-geo-pocket-color,n64,nes,famicom,nds,gb,gbc,gba,pc-fx,psx,psp,sega32,segacd,gamegear,sms,genesis,saturn,snes,sfam,tg16,virtualboy,wonderswan,wonderswan-color}
+msg_ok "Created Platform Folders"
 
 DB_ROOT_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c16)
 DB_PASS=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c16)
@@ -115,7 +118,15 @@ EOF
   echo "  Library (ROMs): /opt/romm/library"
   echo "  Assets (saves): /opt/romm/assets"
   echo "  Config: /opt/romm/config"
-} >>/opt/romm/romm.creds
+  echo ""
+  echo "Platform Folders (EmulatorJS Supported):"
+  echo "  3do, amiga, arcade, atari2600, atari5200, atari7800,"
+  echo "  jaguar, lynx, c64, colecovision, dos, flash,"
+  echo "  neo-geo-pocket, neo-geo-pocket-color, n64, nes, famicom,"
+  echo "  nds, gb, gbc, gba, pc-fx, psx, psp, sega32, segacd,"
+  echo "  gamegear, sms, genesis, saturn, snes, sfam, tg16,"
+  echo "  virtualboy, wonderswan, wonderswan-color"
+} >/opt/romm/romm.creds
 
 cat <<'SETUP_SCRIPT' >/opt/romm/romm-setup.sh
 #!/usr/bin/env bash
@@ -176,9 +187,15 @@ echo "Setup complete!"
 echo ""
 echo "Access RomM at: http://$(hostname -I | awk '{print $1}'):8080"
 echo ""
-echo "ROM Library Location: /opt/romm/library"
-echo "  - Place your ROMs in platform-specific folders"
-echo "  - Example: /opt/romm/library/roms/snes/"
+echo "ROM Library Location: /opt/romm/library/roms/"
+echo ""
+echo "Pre-created Platform Folders (EmulatorJS Supported):"
+echo "  3do, amiga, arcade, atari2600, atari5200, atari7800,"
+echo "  jaguar, lynx, c64, colecovision, dos, flash,"
+echo "  neo-geo-pocket, neo-geo-pocket-color, n64, nes, famicom,"
+echo "  nds, gb, gbc, gba, pc-fx, psx, psp, sega32, segacd,"
+echo "  gamegear, sms, genesis, saturn, snes, sfam, tg16,"
+echo "  virtualboy, wonderswan, wonderswan-color"
 echo ""
 echo "For folder structure details, see:"
 echo "https://docs.romm.app/latest/Getting-Started/Folder-Structure/"
@@ -190,6 +207,19 @@ chmod +x /opt/romm/romm-setup.sh
 cd /opt/romm
 $STD docker compose up -d
 msg_ok "Installed RomM"
+
+msg_info "Configuring Firewall"
+if command -v ufw &>/dev/null; then
+  $STD ufw allow 8080/tcp comment "RomM Web UI"
+  $STD ufw --force enable
+  msg_ok "Configured UFW Firewall"
+else
+  $STD apt-get install -y ufw
+  $STD ufw allow 8080/tcp comment "RomM Web UI"
+  $STD ufw allow 22/tcp comment "SSH"
+  $STD ufw --force enable
+  msg_ok "Installed and Configured UFW Firewall"
+fi
 
 motd_ssh
 customize
